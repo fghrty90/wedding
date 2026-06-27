@@ -148,7 +148,36 @@ section{padding:74px 30px;background:var(--bg);}
 }
 .call-btn svg{width:15px;height:15px;fill:var(--accent);}
 
-/* ===== GALLERY ===== */
+/* ===== GALLERY 슬라이드 ===== */
+.slider{position:relative;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);background:#f4eee6;}
+.slides{
+  display:flex;overflow-x:auto;scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.slides::-webkit-scrollbar{display:none;}
+.slides .slide{
+  flex:0 0 100%;scroll-snap-align:center;aspect-ratio:4/5;background:#f4eee6;cursor:pointer;
+}
+.slides .slide img{width:100%;height:100%;object-fit:cover;display:block;}
+.sl-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:2;
+  width:38px;height:38px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.78);color:var(--ink);font-size:22px;line-height:1;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:0 4px 12px -4px rgba(0,0,0,.3);backdrop-filter:blur(2px);
+}
+.sl-prev{left:12px;} .sl-next{right:12px;}
+.sl-count{
+  position:absolute;right:12px;bottom:12px;z-index:2;
+  background:rgba(40,34,30,.55);color:#fff;font-size:12px;
+  padding:4px 10px;border-radius:20px;letter-spacing:.05em;
+}
+.dots{display:flex;justify-content:center;gap:6px;margin:14px 0 4px;flex-wrap:wrap;}
+.dots .dot{width:7px;height:7px;border-radius:50%;background:var(--accent-soft);transition:.3s;cursor:pointer;}
+.dots .dot.on{background:var(--accent);width:18px;border-radius:6px;}
+
+/* ===== GALLERY 그리드 ===== */
+.gallery-grid{margin-top:24px;}
 .gallery-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:6px;
 }
@@ -367,7 +396,14 @@ footer .f-thanks{font-size:14.5px;margin-top:18px;opacity:.85;line-height:1.8;}
     <span class="tag">Gallery</span>
     <h2 class="heading serif">우리의 순간</h2>
     <div class="divider"></div>
-    <div class="gallery-grid" id="gallery"><!-- JS가 16칸 생성 --></div>
+    <div class="slider">
+      <div class="slides" id="slides"><!-- JS 생성 --></div>
+      <button class="sl-arrow sl-prev" id="slPrev" aria-label="이전">‹</button>
+      <button class="sl-arrow sl-next" id="slNext" aria-label="다음">›</button>
+      <div class="sl-count" id="slCount">1 / 13</div>
+    </div>
+    <div class="dots" id="dots"><!-- JS 생성 --></div>
+    <div class="gallery-grid" id="gallery"><!-- JS 생성 --></div>
   </section>
 
   <!-- ===================== CALENDAR / D-DAY ===================== -->
@@ -573,7 +609,7 @@ footer .f-thanks{font-size:14.5px;margin-top:18px;opacity:.85;line-height:1.8;}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ---------- 갤러리 (16장) ---------- */
+/* ---------- 갤러리 (그리드) ---------- */
 const TOTAL = 13;
 const gallery = document.getElementById('gallery');
 for(let i=1;i<=TOTAL;i++){
@@ -581,12 +617,50 @@ for(let i=1;i<=TOTAL;i++){
   cell.className='cell';
   cell.dataset.n=i;
   const img = new Image();
-  img.src = `photos/${i}.jpg`;          // photos/1.jpg ~ photos/16.jpg 넣으면 자동 표시
+  img.src = `photos/${i}.jpg`;          // photos/1.jpg ~ 넣으면 자동 표시
   img.alt = `gallery ${i}`;
   img.onload = ()=>{ cell.classList.add('has-img'); cell.appendChild(img); };
   cell.addEventListener('click',()=>{ if(cell.classList.contains('has-img')) openLB(i); });
   gallery.appendChild(cell);
 }
+
+/* ---------- 갤러리 (자동 슬라이드) ---------- */
+const slidesEl=document.getElementById('slides'),dotsEl=document.getElementById('dots'),slCount=document.getElementById('slCount');
+let slIdx=0, slTimer=null;
+for(let i=1;i<=TOTAL;i++){
+  const s=document.createElement('div');s.className='slide';
+  const im=new Image();im.src=`photos/${i}.jpg`;im.alt=`slide ${i}`;
+  s.appendChild(im);
+  s.addEventListener('click',()=>openLB(i));
+  slidesEl.appendChild(s);
+  const d=document.createElement('div');d.className='dot'+(i===1?' on':'');
+  d.addEventListener('click',()=>goSlide(i-1,true));
+  dotsEl.appendChild(d);
+}
+function goSlide(n,user){
+  slIdx=(n+TOTAL)%TOTAL;
+  slidesEl.scrollTo({left:slidesEl.clientWidth*slIdx,behavior:user?'smooth':'auto'});
+  syncDots();
+  if(user)restartAuto();
+}
+function syncDots(){
+  slCount.textContent=`${slIdx+1} / ${TOTAL}`;
+  [...dotsEl.children].forEach((d,i)=>d.classList.toggle('on',i===slIdx));
+}
+// 스와이프(스크롤) 시 현재 인덱스 동기화
+let scrollT;
+slidesEl.addEventListener('scroll',()=>{
+  clearTimeout(scrollT);
+  scrollT=setTimeout(()=>{ slIdx=Math.round(slidesEl.scrollLeft/slidesEl.clientWidth); syncDots(); },90);
+});
+document.getElementById('slPrev').onclick=()=>goSlide(slIdx-1,true);
+document.getElementById('slNext').onclick=()=>goSlide(slIdx+1,true);
+function startAuto(){ slTimer=setInterval(()=>goSlide(slIdx+1,false),3500); }
+function restartAuto(){ clearInterval(slTimer); startAuto(); }
+// 사용자가 만지는 동안 자동재생 잠시 멈춤
+slidesEl.addEventListener('pointerdown',()=>clearInterval(slTimer));
+slidesEl.addEventListener('pointerup',restartAuto);
+startAuto();
 
 /* ---------- 라이트박스 ---------- */
 const lb=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg'),lbCount=document.getElementById('lbCount');
