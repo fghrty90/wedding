@@ -860,7 +860,7 @@ function loadKakaoMap(){
     kakao.maps.load(()=>{ try{
       const c=document.getElementById('mapBox');
       const pos=new kakao.maps.LatLng(VENUE.lat,VENUE.lng);
-      const map=new kakao.maps.Map(c,{center:pos,level:3});
+      const map=new kakao.maps.Map(c,{center:pos,level:4});
       new kakao.maps.Marker({position:pos}).setMap(map);
       map.setZoomable(true);
     }catch(e){ loadGoogleMap(); } });
