@@ -15,17 +15,17 @@
 
 <style>
 :root{
-  --bg:#faf7f2;
+  --bg:#ffffff;
   --paper:#ffffff;
-  --ink:#3a3531;
-  --ink-soft:#8a817a;
-  --line:#ebe4da;
-  --accent:#a9876c;      /* 따뜻한 모카 */
-  --accent-soft:#c9b29c;
-  --sage:#8b9183;
-  --gold:#b89968;
+  --ink:#4a4540;
+  --ink-soft:#a39b92;
+  --line:#f0ece6;
+  --accent:#c4a78e;      /* 밝은 샴페인 베이지 */
+  --accent-soft:#e0cdba;
+  --sage:#9aa394;
+  --gold:#cbb088;
   --radius:18px;
-  --shadow:0 18px 50px -28px rgba(58,53,49,.45);
+  --shadow:0 16px 44px -30px rgba(120,100,84,.4);
   --maxw:460px;
 }
 
@@ -33,7 +33,7 @@
 html{scroll-behavior:smooth;}
 body{
   font-family:"Pretendard",-apple-system,sans-serif;
-  background:#e8e1d6;
+  background:#f4f1ed;
   color:var(--ink);
   line-height:1.7;
   letter-spacing:-.01em;
@@ -55,59 +55,56 @@ body{
 .reveal{opacity:0;transform:translateY(28px);transition:opacity 1s ease,transform 1s cubic-bezier(.2,.7,.2,1);}
 .reveal.in{opacity:1;transform:none;}
 
-/* ===== HERO ===== */
+/* ===== HERO (밝은 화이트) ===== */
 .hero{
   position:relative;
-  height:100svh;
-  min-height:620px;
+  min-height:100svh;
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:space-between;
-  padding:54px 28px 40px;
+  justify-content:center;
+  gap:22px;
+  padding:52px 28px 40px;
   text-align:center;
-  color:#fff;
+  color:var(--ink);
   overflow:hidden;
-  background:linear-gradient(155deg,#b89e84 0%,#9c7b5e 45%,#6f5743 100%);
+  background:linear-gradient(180deg,#ffffff 0%,#fdf9f5 60%,#faf4ee 100%);
 }
-.hero__bg{
-  position:absolute;top:0;left:0;right:0;bottom:0;
-  background-image:
-    linear-gradient(180deg,rgba(35,28,24,.45) 0%,rgba(35,28,24,.2) 38%,rgba(35,28,24,.7) 100%),
-    url("photos/main.jpg"),
-    linear-gradient(155deg,#b89e84 0%,#9c7b5e 45%,#6f5743 100%);
-  background-size:cover,cover,cover;
-  background-position:center,center,center;
-  background-repeat:no-repeat,no-repeat,no-repeat;
-  z-index:0;
-  transform:scale(1.05);
-  animation:heroZoom 9s ease-out forwards;
-}
-@keyframes heroZoom{to{transform:scale(1);}}
-.hero>*{position:relative;z-index:1;}
-.hero__top{margin-top:8px;}
+.hero__top{margin-bottom:2px;}
 .hero__label{
-  font-size:13px;letter-spacing:.5em;text-indent:.5em;
-  font-weight:500;opacity:.92;text-transform:uppercase;
+  font-size:12px;letter-spacing:.45em;text-indent:.45em;
+  font-weight:600;color:var(--accent);text-transform:uppercase;
 }
-.hero__line{width:34px;height:1px;background:rgba(255,255,255,.7);margin:18px auto;}
 .hero__names{
-  font-size:46px;font-weight:400;line-height:1.25;
-  text-shadow:0 4px 24px rgba(0,0,0,.25);
+  font-size:44px;font-weight:400;line-height:1.22;color:var(--ink);
 }
-.hero__names .amp{display:block;font-size:24px;margin:6px 0;font-weight:300;opacity:.9;}
-.hero__bottom{display:flex;flex-direction:column;gap:6px;}
-.hero__date{font-size:17px;font-weight:500;letter-spacing:.04em;}
-.hero__place{font-size:13.5px;opacity:.9;}
+.hero__names .amp{display:block;font-size:22px;margin:4px 0;font-weight:300;color:var(--accent);}
+.hero__photo{
+  width:74%;max-width:288px;aspect-ratio:3/4;margin:6px auto;
+  border-radius:150px 150px 16px 16px;overflow:hidden;
+  box-shadow:0 26px 50px -26px rgba(150,120,95,.5);
+  background:linear-gradient(160deg,#f3ece3,#e7dccf);
+  position:relative;
+}
+.hero__photo::after{
+  content:"사진 준비중";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#c3b6a6;font-size:13px;letter-spacing:.1em;
+}
+.hero__photo img{position:relative;width:100%;height:100%;object-fit:cover;z-index:1;
+  opacity:0;transition:opacity .8s;}
+.hero__photo img.loaded{opacity:1;}
+.hero__bottom{display:flex;flex-direction:column;gap:5px;}
+.hero__date{font-size:16px;font-weight:600;letter-spacing:.03em;color:var(--ink);}
+.hero__place{font-size:13.5px;color:var(--ink-soft);}
 .scrolldot{
-  width:26px;height:42px;border:1.5px solid rgba(255,255,255,.7);border-radius:14px;
-  margin:20px auto 0;position:relative;
+  width:24px;height:38px;border:1.5px solid var(--accent-soft);border-radius:14px;
+  margin:8px auto 0;position:relative;
 }
 .scrolldot::after{
-  content:"";position:absolute;left:50%;top:8px;width:4px;height:8px;border-radius:4px;
-  background:#fff;transform:translateX(-50%);animation:dot 1.6s infinite;
+  content:"";position:absolute;left:50%;top:8px;width:4px;height:7px;border-radius:4px;
+  background:var(--accent);transform:translateX(-50%);animation:dot 1.6s infinite;
 }
-@keyframes dot{0%{opacity:0;top:8px}40%{opacity:1}80%{opacity:0;top:22px}100%{opacity:0}}
+@keyframes dot{0%{opacity:0;top:8px}40%{opacity:1}80%{opacity:0;top:20px}100%{opacity:0}}
 
 /* ===== 공통 섹션 ===== */
 section{padding:74px 30px;background:var(--bg);}
@@ -156,7 +153,7 @@ section{padding:74px 30px;background:var(--bg);}
   display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:6px;
 }
 .gallery-grid .cell{
-  aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#e7ded2;
+  aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#f4eee6;
   position:relative;cursor:pointer;
 }
 .gallery-grid .cell img{width:100%;height:100%;object-fit:cover;transition:transform .5s;}
@@ -303,22 +300,22 @@ footer .f-thanks{font-size:13px;margin-top:18px;opacity:.85;line-height:1.8;}
 
   <!-- ===================== HERO ===================== -->
   <header class="hero">
-    <div class="hero__bg"></div>
     <div class="hero__top">
-      <div class="hero__label">We're getting married</div>
+      <div class="hero__label">The Wedding of</div>
     </div>
-    <div>
-      <h1 class="hero__names serif">
-        경성
-        <span class="amp">&amp;</span>
-        서희
-      </h1>
+    <h1 class="hero__names serif">
+      경성
+      <span class="amp">&amp;</span>
+      서희
+    </h1>
+    <div class="hero__photo">
+      <img id="heroImg" src="photos/main.jpg" alt="경성 서희" onload="this.classList.add('loaded')" />
     </div>
     <div class="hero__bottom">
-      <div class="hero__date serif">2026. 08. 29. SAT</div>
-      <div class="hero__place">낮 12:40 · 위더스 영등포 9층 아모르홀</div>
-      <div class="scrolldot"></div>
+      <div class="hero__date serif">2026. 08. 29. SAT · 12:40 PM</div>
+      <div class="hero__place">위더스 영등포 9층 아모르홀</div>
     </div>
+    <div class="scrolldot"></div>
   </header>
 
   <!-- ===================== INVITATION ===================== -->
