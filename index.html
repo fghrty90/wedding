@@ -22,6 +22,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500&family=Gowun+Batang:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <script src="https://t1.kakao.com/kakao_js_sdk/2.7.4/kakao.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <style>
 :root{
@@ -784,48 +786,53 @@ document.getElementById('shareKakao').onclick=()=>{
   });
 };
 
-/* ---------- 방명록 (로컬 저장 + 삭제) ---------- */
+/* ---------- 방명록 (Firebase Firestore — 모든 기기 실시간 공유) ---------- */
 const gbForm=document.getElementById('gbForm'),gbList=document.getElementById('guestList');
 document.getElementById('gbToggle').onclick=()=>gbForm.classList.toggle('show');
 
 // 관리자(신랑신부) 비밀번호 — 이 비번으로는 모든 글 삭제 가능
 const ADMIN_PW='0829';
-// 기본 축하 글 (삭제하면 다시 안 보이도록 숨김 목록 관리)
-const SEED=[
-  {id:'seed-1',name:'쵬지',date:'2026-06-22',msg:'결혼 추카추카 합니다 🎉🎉'},
-  {id:'seed-2',name:'김우겸',date:'2026-06-22',msg:'결혼을 진심으로 축하합니다. 꽃길만 걸으시길!!!'}
-];
-const getUsers=()=>JSON.parse(localStorage.getItem('guestbook')||'[]');
-const getHidden=()=>JSON.parse(localStorage.getItem('gbHidden')||'[]');
 
-function renderAll(){
+const firebaseConfig={
+  apiKey:"AIzaSyBH0kLPo_S7TrLdiv9WnS2VD0vPxwHbwnw",
+  authDomain:"wedding-99083.firebaseapp.com",
+  projectId:"wedding-99083",
+  storageBucket:"wedding-99083.firebasestorage.app",
+  messagingSenderId:"153953870116",
+  appId:"1:153953870116:web:438d0a06079c138591d3b1"
+};
+let db=null;
+try{
+  if(window.firebase){ firebase.initializeApp(firebaseConfig); db=firebase.firestore(); }
+}catch(e){ console.error('Firebase init 실패',e); }
+
+function renderGuests(docs){
   gbList.innerHTML='';
-  const hidden=getHidden();
-  const all=[...SEED.filter(s=>!hidden.includes(s.id)), ...getUsers()];
-  all.forEach(g=>{
+  if(!docs.length){
+    gbList.innerHTML='<div class="guest" style="text-align:center;color:var(--ink-soft)">첫 번째 축하 글을 남겨주세요 🤍</div>';
+    return;
+  }
+  docs.forEach(d=>{
+    const g=d.data();
+    const date=g.createdAt&&g.createdAt.toDate?g.createdAt.toDate().toISOString().slice(0,10):(g.date||'');
     const el=document.createElement('div');el.className='guest';
     el.innerHTML=`<div class="g-top"><span class="g-name"></span><button class="g-del" title="삭제">×</button><span class="g-date"></span></div><div class="g-msg"></div>`;
     el.querySelector('.g-name').textContent=g.name;
-    el.querySelector('.g-date').textContent=g.date;
+    el.querySelector('.g-date').textContent=date;
     el.querySelector('.g-msg').textContent=g.msg;
-    el.querySelector('.g-del').onclick=()=>tryDelete(g);
+    el.querySelector('.g-del').onclick=()=>tryDelete(d.id,g.pw);
     gbList.appendChild(el);
   });
 }
-function tryDelete(g){
+function tryDelete(id,pw){
   const input=prompt('삭제하려면 비밀번호를 입력하세요\n(작성 시 입력한 비번 또는 관리자 비번)');
-  if(input===null) return;                       // 취소
-  const ok = input===ADMIN_PW || (g.pw && input===g.pw);
+  if(input===null) return;
+  const ok = input===ADMIN_PW || (pw && input===pw);
   if(!ok){ showToast('비밀번호가 일치하지 않습니다'); return; }
-  removeGuest(g.id);
-}
-function removeGuest(id){
-  if(String(id).startsWith('seed-')){
-    const hidden=getHidden(); if(!hidden.includes(id)){hidden.push(id);localStorage.setItem('gbHidden',JSON.stringify(hidden));}
-  }else{
-    localStorage.setItem('guestbook',JSON.stringify(getUsers().filter(g=>g.id!==id)));
-  }
-  renderAll();showToast('글이 삭제되었습니다');
+  if(!db){ showToast('연결 오류로 삭제할 수 없습니다'); return; }
+  db.collection('guestbook').doc(id).delete()
+    .then(()=>showToast('글이 삭제되었습니다'))
+    .catch(()=>showToast('삭제 중 오류가 발생했습니다'));
 }
 gbForm.onsubmit=e=>{
   e.preventDefault();
@@ -834,13 +841,23 @@ gbForm.onsubmit=e=>{
   const pw=document.getElementById('gbPw').value.trim();
   if(!name||!msg)return;
   if(!/^\d{4,6}$/.test(pw)){ showToast('비밀번호는 숫자 4~6자리로 입력해주세요'); return; }
-  const date=new Date().toISOString().slice(0,10);
-  const id='u-'+date+'-'+Math.floor(performance.now());
-  const users=getUsers();users.push({id,name,msg,date,pw});
-  localStorage.setItem('guestbook',JSON.stringify(users));
-  renderAll();gbForm.reset();gbForm.classList.remove('show');showToast('축하 글이 등록되었습니다');
+  if(!db){ showToast('연결 오류로 등록할 수 없습니다'); return; }
+  db.collection('guestbook').add({
+    name,msg,pw,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    gbForm.reset();gbForm.classList.remove('show');showToast('축하 글이 등록되었습니다');
+  }).catch(()=>showToast('등록 중 오류가 발생했습니다'));
 };
-renderAll();
+// 실시간 구독 (최신글이 위로)
+if(db){
+  db.collection('guestbook').orderBy('createdAt','desc').onSnapshot(
+    snap=>renderGuests(snap.docs),
+    err=>{ console.error(err); gbList.innerHTML='<div class="guest" style="text-align:center;color:var(--ink-soft)">방명록을 불러오지 못했습니다</div>'; }
+  );
+}else{
+  gbList.innerHTML='<div class="guest" style="text-align:center;color:var(--ink-soft)">방명록을 불러오지 못했습니다</div>';
+}
 
 /* ---------- 지도 (카카오 인터랙티브 지도, 실패 시 구글 폴백) ---------- */
 const VENUE={lat:37.521371,lng:126.904494,name:"위더스 영등포 9층 아모르홀"};
