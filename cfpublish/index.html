@@ -799,17 +799,29 @@ const SHARE_URL='https://kyungsung-seohee.pages.dev/';
 const OG_IMG='https://kyungsung-seohee.pages.dev/photos/og2.jpg';
 if(window.Kakao && !Kakao.isInitialized()){ Kakao.init(KAKAO_JS_KEY); }
 document.getElementById('shareKakao').onclick=()=>{
-  if(!(window.Kakao && Kakao.isInitialized())){ showToast('잠시 후 다시 시도해주세요'); return; }
-  Kakao.Share.sendDefault({
-    objectType:'feed',
-    content:{
-      title:'경성 ♥ 서희, 결혼합니다',
-      description:'2026년 8월 29일 토요일 낮 12시 40분\n위더스 영등포 9층 아모르홀',
-      imageUrl:OG_IMG,
-      link:{ mobileWebUrl:SHARE_URL, webUrl:SHARE_URL }
-    },
-    buttons:[{ title:'청첩장 보기', link:{ mobileWebUrl:SHARE_URL, webUrl:SHARE_URL } }]
-  });
+  // 1) 카카오 SDK 사용 가능하면 맞춤 카드로 공유
+  if(window.Kakao && Kakao.isInitialized()){
+    Kakao.Share.sendDefault({
+      objectType:'feed',
+      content:{
+        title:'경성 ♥ 서희, 결혼합니다',
+        description:'2026년 8월 29일 토요일 낮 12시 40분\n위더스 영등포 9층 아모르홀',
+        imageUrl:OG_IMG,
+        link:{ mobileWebUrl:SHARE_URL, webUrl:SHARE_URL }
+      },
+      buttons:[{ title:'청첩장 보기', link:{ mobileWebUrl:SHARE_URL, webUrl:SHARE_URL } }]
+    });
+    return;
+  }
+  // 2) SDK 차단/미로드 시 → 폰 기본 공유시트(카카오톡 포함)
+  if(navigator.share){
+    navigator.share({ title:'경성 ♥ 서희, 결혼합니다', text:'2026년 8월 29일 토요일 낮 12시 40분 · 위더스 영등포 9층 아모르홀', url:SHARE_URL })
+      .catch(()=>{});
+    return;
+  }
+  // 3) 그것도 안 되면 링크 복사
+  navigator.clipboard.writeText(SHARE_URL).then(()=>showToast('청첩장 링크가 복사되었습니다'))
+    .catch(()=>showToast('링크: '+SHARE_URL));
 };
 
 /* ---------- 방명록 (Firebase Firestore — 모든 기기 실시간 공유) ---------- */
