@@ -841,8 +841,7 @@ gbForm.onsubmit=e=>{
 };
 renderAll();
 
-/* ---------- 지도 (네이버 우선, 키 없으면 구글 폴백) ---------- */
-const NAVER_MAP_KEY=""; // ← 네이버 클라우드 Maps "Key ID" 입력하면 네이버 지도로 표시
+/* ---------- 지도 (카카오 인터랙티브 지도, 실패 시 구글 폴백) ---------- */
 const VENUE={lat:37.521371,lng:126.904494,name:"위더스 영등포 9층 아모르홀"};
 function loadGoogleMap(){
   const box=document.getElementById('mapBox');if(!box)return;
@@ -852,29 +851,23 @@ function loadGoogleMap(){
   f.src=`https://maps.google.com/maps?q=${VENUE.lat},${VENUE.lng}&z=17&output=embed`;
   box.replaceWith(f);
 }
-function loadNaverImage(){
-  const box=document.getElementById('mapBox');if(!box)return;
-  const a=document.createElement('a');
-  a.href='https://map.naver.com/p/entry/place/36957673';a.target='_blank';a.rel='noopener';
-  a.title='네이버 지도에서 보기';a.style.display='block';
-  const img=new Image();img.src='photos/map.jpg';img.alt='예식장 위치 - 네이버 지도';
-  img.style.width='100%';img.style.height='auto';img.style.display='block';img.style.cursor='pointer';
-  img.onerror=loadGoogleMap;
-  a.appendChild(img);box.replaceWith(a);
-}
-function loadNaverMap(){
-  window.navermap_authFailure=loadNaverImage;
+function loadKakaoMap(){
   const s=document.createElement('script');
-  s.src=`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_MAP_KEY}`;
-  s.onload=()=>{ try{
-    const pos=new naver.maps.LatLng(VENUE.lat,VENUE.lng);
-    const map=new naver.maps.Map('mapBox',{center:pos,zoom:17,scaleControl:false,mapDataControl:false});
-    new naver.maps.Marker({position:pos,map,title:VENUE.name});
-  }catch(e){ loadNaverImage(); } };
-  s.onerror=loadNaverImage;
+  s.src=`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
+  s.onload=()=>{
+    if(!(window.kakao && kakao.maps)){ loadGoogleMap(); return; }
+    kakao.maps.load(()=>{ try{
+      const c=document.getElementById('mapBox');
+      const pos=new kakao.maps.LatLng(VENUE.lat,VENUE.lng);
+      const map=new kakao.maps.Map(c,{center:pos,level:3});
+      new kakao.maps.Marker({position:pos}).setMap(map);
+      map.setZoomable(true);
+    }catch(e){ loadGoogleMap(); } });
+  };
+  s.onerror=loadGoogleMap;
   document.head.appendChild(s);
 }
-NAVER_MAP_KEY ? loadNaverMap() : loadNaverImage();
+loadKakaoMap();
 </script>
 </body>
 </html>
