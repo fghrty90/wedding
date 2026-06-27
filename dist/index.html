@@ -833,19 +833,29 @@ function loadGoogleMap(){
   f.src=`https://maps.google.com/maps?q=${VENUE.lat},${VENUE.lng}&z=17&output=embed`;
   box.replaceWith(f);
 }
+function loadNaverImage(){
+  const box=document.getElementById('mapBox');if(!box)return;
+  const a=document.createElement('a');
+  a.href='https://map.naver.com/p/entry/place/36957673';a.target='_blank';a.rel='noopener';
+  a.title='네이버 지도에서 보기';a.style.display='block';
+  const img=new Image();img.src='photos/map.jpg';img.alt='예식장 위치 - 네이버 지도';
+  img.style.width='100%';img.style.height='auto';img.style.display='block';img.style.cursor='pointer';
+  img.onerror=loadGoogleMap;
+  a.appendChild(img);box.replaceWith(a);
+}
 function loadNaverMap(){
-  window.navermap_authFailure=loadGoogleMap;
+  window.navermap_authFailure=loadNaverImage;
   const s=document.createElement('script');
   s.src=`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_MAP_KEY}`;
   s.onload=()=>{ try{
     const pos=new naver.maps.LatLng(VENUE.lat,VENUE.lng);
     const map=new naver.maps.Map('mapBox',{center:pos,zoom:17,scaleControl:false,mapDataControl:false});
     new naver.maps.Marker({position:pos,map,title:VENUE.name});
-  }catch(e){ loadGoogleMap(); } };
-  s.onerror=loadGoogleMap;
+  }catch(e){ loadNaverImage(); } };
+  s.onerror=loadNaverImage;
   document.head.appendChild(s);
 }
-NAVER_MAP_KEY ? loadNaverMap() : loadGoogleMap();
+NAVER_MAP_KEY ? loadNaverMap() : loadNaverImage();
 </script>
 </body>
 </html>
