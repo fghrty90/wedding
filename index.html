@@ -177,22 +177,22 @@ section{padding:74px 30px;background:var(--bg);}
 .lightbox .lb-count{color:rgba(255,255,255,.8);margin-top:18px;font-size:14px;letter-spacing:.1em;}
 
 /* ===== CALENDAR / DDAY ===== */
-.cal-wrap{background:var(--paper);border-radius:var(--radius);padding:30px 24px;box-shadow:var(--shadow);}
+.cal-wrap{background:var(--paper);border-radius:var(--radius);padding:26px 22px;box-shadow:var(--shadow);}
 .cal-date{text-align:center;margin-bottom:22px;}
 .cal-date .d{font-size:20px;font-weight:600;}
 .cal-date .t{color:var(--ink-soft);font-size:14px;margin-top:2px;}
 table.cal{width:100%;border-collapse:collapse;text-align:center;}
-table.cal th{font-size:12px;color:var(--ink-soft);font-weight:500;padding-bottom:12px;}
-table.cal td{font-size:14px;padding:9px 0;color:#5d564f;}
+table.cal th{font-size:12px;color:var(--ink-soft);font-weight:500;padding-bottom:7px;}
+table.cal td{font-size:13.5px;padding:4px 0;color:#5d564f;}
 table.cal th:first-child,table.cal td:first-child{color:#c98b86;}
 table.cal .today{position:relative;color:#fff;font-weight:700;}
 table.cal .today span{
   position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;
-  width:34px;height:34px;
+  width:30px;height:30px;
 }
 table.cal .today::after{
   content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:34px;height:34px;border-radius:50%;background:var(--accent);z-index:0;
+  width:30px;height:30px;border-radius:50%;background:var(--accent);z-index:0;
 }
 .dday{text-align:center;margin-top:26px;padding-top:24px;border-top:1px solid var(--line);}
 .countdown{display:flex;justify-content:center;gap:10px;}
@@ -246,9 +246,14 @@ table.cal .today::after{
 /* ===== GUESTBOOK ===== */
 .guest-list{display:flex;flex-direction:column;gap:12px;}
 .guest{background:var(--paper);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);}
-.guest .g-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.guest .g-top{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
 .guest .g-name{font-weight:600;font-size:14px;}
-.guest .g-date{font-size:11.5px;color:var(--ink-soft);}
+.guest .g-date{font-size:11.5px;color:var(--ink-soft);margin-left:auto;}
+.guest .g-del{
+  border:none;background:none;color:var(--ink-soft);font-size:16px;line-height:1;
+  padding:2px 4px;cursor:pointer;border-radius:6px;
+}
+.guest .g-del:active{background:var(--line);}
 .guest .g-msg{font-size:13.5px;color:#5d564f;line-height:1.7;}
 .guest-actions{display:flex;gap:10px;margin-top:18px;}
 .guest-actions button{
@@ -501,16 +506,7 @@ footer .f-thanks{font-size:13px;margin-top:18px;opacity:.85;line-height:1.8;}
     <span class="tag">Guestbook</span>
     <h2 class="heading serif">방명록</h2>
     <div class="divider"></div>
-    <div class="guest-list" id="guestList">
-      <div class="guest">
-        <div class="g-top"><span class="g-name">쵬지</span><span class="g-date">2026-06-22</span></div>
-        <div class="g-msg">결혼 추카추카 합니다 🎉🎉</div>
-      </div>
-      <div class="guest">
-        <div class="g-top"><span class="g-name">김우겸</span><span class="g-date">2026-06-22</span></div>
-        <div class="g-msg">결혼을 진심으로 축하합니다. 꽃길만 걸으시길!!!</div>
-      </div>
-    </div>
+    <div class="guest-list" id="guestList"></div>
     <div class="guest-actions">
       <button class="solid" id="gbToggle">축하 글 남기기</button>
     </div>
@@ -623,29 +619,52 @@ document.getElementById('shareKakao').onclick=()=>{
   showToast('카카오 공유는 Kakao SDK 키 연결 후 동작합니다');
 };
 
-/* ---------- 방명록 (로컬 저장) ---------- */
+/* ---------- 방명록 (로컬 저장 + 삭제) ---------- */
 const gbForm=document.getElementById('gbForm'),gbList=document.getElementById('guestList');
 document.getElementById('gbToggle').onclick=()=>gbForm.classList.toggle('show');
-JSON.parse(localStorage.getItem('guestbook')||'[]').forEach(g=>renderGuest(g,true));
+
+// 기본 축하 글 (삭제하면 다시 안 보이도록 숨김 목록 관리)
+const SEED=[
+  {id:'seed-1',name:'쵬지',date:'2026-06-22',msg:'결혼 추카추카 합니다 🎉🎉'},
+  {id:'seed-2',name:'김우겸',date:'2026-06-22',msg:'결혼을 진심으로 축하합니다. 꽃길만 걸으시길!!!'}
+];
+const getUsers=()=>JSON.parse(localStorage.getItem('guestbook')||'[]');
+const getHidden=()=>JSON.parse(localStorage.getItem('gbHidden')||'[]');
+
+function renderAll(){
+  gbList.innerHTML='';
+  const hidden=getHidden();
+  const all=[...SEED.filter(s=>!hidden.includes(s.id)), ...getUsers()];
+  all.forEach(g=>{
+    const el=document.createElement('div');el.className='guest';
+    el.innerHTML=`<div class="g-top"><span class="g-name"></span><button class="g-del" title="삭제">×</button><span class="g-date"></span></div><div class="g-msg"></div>`;
+    el.querySelector('.g-name').textContent=g.name;
+    el.querySelector('.g-date').textContent=g.date;
+    el.querySelector('.g-msg').textContent=g.msg;
+    el.querySelector('.g-del').onclick=()=>{ if(confirm('이 글을 삭제할까요?')) removeGuest(g.id); };
+    gbList.appendChild(el);
+  });
+}
+function removeGuest(id){
+  if(String(id).startsWith('seed-')){
+    const hidden=getHidden(); if(!hidden.includes(id)){hidden.push(id);localStorage.setItem('gbHidden',JSON.stringify(hidden));}
+  }else{
+    localStorage.setItem('guestbook',JSON.stringify(getUsers().filter(g=>g.id!==id)));
+  }
+  renderAll();showToast('글이 삭제되었습니다');
+}
 gbForm.onsubmit=e=>{
   e.preventDefault();
   const name=document.getElementById('gbName').value.trim();
   const msg=document.getElementById('gbMsg').value.trim();
   if(!name||!msg)return;
   const date=new Date().toISOString().slice(0,10);
-  const g={name,msg,date};
-  const saved=JSON.parse(localStorage.getItem('guestbook')||'[]');saved.push(g);
-  localStorage.setItem('guestbook',JSON.stringify(saved));
-  renderGuest(g,false);gbForm.reset();gbForm.classList.remove('show');showToast('축하 글이 등록되었습니다');
+  const id='u-'+date+'-'+Math.floor(performance.now());
+  const users=getUsers();users.push({id,name,msg,date});
+  localStorage.setItem('guestbook',JSON.stringify(users));
+  renderAll();gbForm.reset();gbForm.classList.remove('show');showToast('축하 글이 등록되었습니다');
 };
-function renderGuest(g,append){
-  const el=document.createElement('div');el.className='guest';
-  el.innerHTML=`<div class="g-top"><span class="g-name"></span><span class="g-date"></span></div><div class="g-msg"></div>`;
-  el.querySelector('.g-name').textContent=g.name;
-  el.querySelector('.g-date').textContent=g.date;
-  el.querySelector('.g-msg').textContent=g.msg;
-  append?gbList.appendChild(el):gbList.prepend(el);
-}
+renderAll();
 </script>
 </body>
 </html>
