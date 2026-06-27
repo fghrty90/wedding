@@ -347,14 +347,14 @@ footer .f-thanks{font-size:14.5px;margin-top:18px;opacity:.85;line-height:1.8;}
 /* =====================================================
    MODERN EDITORIAL — 모던/세련 (메인 핑크 프레임 유지)
    ===================================================== */
-:root{ --accent:#dd8aa0; --accent-soft:#f0cdd6; --ink:#33302d; --ink-soft:#9c948c; }
-section{ padding:92px 32px; }
+:root{ --accent:#d97f98; --accent-soft:#f0cdd6; --ink:#2f2c29; --ink-soft:#7d756d; }
+section{ padding:88px 30px; }
 .tag{
   font-family:"Cormorant Garamond",serif !important;
   font-style:italic;font-weight:500;text-transform:none;
-  font-size:20px;letter-spacing:.06em;text-indent:0;color:var(--accent);margin-bottom:10px;
+  font-size:22px;letter-spacing:.06em;text-indent:0;color:var(--accent);margin-bottom:10px;
 }
-.heading{ font-family:"Noto Serif KR",serif;font-weight:300;font-size:25px;letter-spacing:.04em;color:var(--ink); }
+.heading{ font-family:"Noto Serif KR",serif;font-weight:500;font-size:27px;letter-spacing:.03em;color:var(--ink); }
 .divider{ width:1px;height:40px;background:linear-gradient(var(--accent-soft),transparent);margin:22px auto 0; }
 
 .hero{ gap:0;padding:64px 30px 48px; }
@@ -364,18 +364,18 @@ section{ padding:92px 32px; }
   font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:500;
   font-size:22px;letter-spacing:.04em;text-transform:none;color:var(--accent);margin-bottom:22px;
 }
-.hero__names{ font-family:"Noto Serif KR",serif;font-weight:200;font-size:52px;letter-spacing:.14em;line-height:1.3; }
+.hero__names{ font-family:"Noto Serif KR",serif;font-weight:400;font-size:52px;letter-spacing:.14em;line-height:1.3; }
 .hero__names .amp{
   font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:400;
   font-size:34px;color:var(--accent);margin:10px 0;letter-spacing:0;
 }
 .hero__photo{ margin:34px auto 30px;width:78%;max-width:300px;aspect-ratio:4/5; }  /* 아치+핑크프레임은 기본 유지 */
 .hero__photo::after{ background:#ff9dc5;opacity:.2; }                              /* 핑크 틴트 은은하게 */
-.hero__date{ font-family:"Noto Serif KR",serif;font-weight:400;font-size:17px;letter-spacing:.05em;color:var(--ink);margin-bottom:4px; }
-.hero__place{ font-size:13px;letter-spacing:.04em;color:var(--ink-soft); }
+.hero__date{ font-family:"Noto Serif KR",serif;font-weight:500;font-size:18.5px;letter-spacing:.04em;color:var(--ink);margin-bottom:5px; }
+.hero__place{ font-size:15px;letter-spacing:.02em;color:var(--ink-soft); }
 
 .invite .ornament{ font-family:"Cormorant Garamond",serif;font-style:italic;font-size:26px; }
-.invite .msg{ font-family:"Gowun Batang",serif;font-size:17px;line-height:2.5;color:#5b544d; }
+.invite .msg{ font-family:"Gowun Batang",serif;font-size:18.5px;line-height:2.4;color:#4a443e; }
 .sl-cap{ font-family:"Cormorant Garamond",serif !important;font-style:italic;font-size:19px; }
 
 /* 토스트 */
@@ -823,7 +823,7 @@ gbForm.onsubmit=e=>{
 renderAll();
 
 /* ---------- 지도 (네이버 우선, 키 없으면 구글 폴백) ---------- */
-const NAVER_MAP_KEY=""; // ← 네이버 클라우드 Maps Client ID 입력하면 네이버 지도로 표시
+const NAVER_MAP_KEY=""; // ← 네이버 클라우드 Maps "Key ID" 입력하면 네이버 지도로 표시
 const VENUE={lat:37.521371,lng:126.904494,name:"위더스 영등포 9층 아모르홀"};
 function loadGoogleMap(){
   const box=document.getElementById('mapBox');if(!box)return;
@@ -836,7 +836,7 @@ function loadGoogleMap(){
 function loadNaverMap(){
   window.navermap_authFailure=loadGoogleMap;
   const s=document.createElement('script');
-  s.src=`https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NAVER_MAP_KEY}`;
+  s.src=`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_MAP_KEY}`;
   s.onload=()=>{ try{
     const pos=new naver.maps.LatLng(VENUE.lat,VENUE.lng);
     const map=new naver.maps.Map('mapBox',{center:pos,zoom:17,scaleControl:false,mapDataControl:false});
