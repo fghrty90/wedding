@@ -4,9 +4,17 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>경성 &amp; 서희 결혼합니다</title>
-<meta property="og:title" content="경성 ♥ 서희 결혼합니다" />
-<meta property="og:description" content="2026년 08월 29일 토요일 낮 12:40 · 위더스 영등포 9층 아모르홀" />
+<meta property="og:title" content="경성 ♥ 서희, 결혼합니다" />
+<meta property="og:description" content="2026년 8월 29일 토요일 낮 12시 40분 · 위더스 영등포 9층 아모르홀" />
 <meta property="og:type" content="website" />
+<meta property="og:url" content="https://kyungsung-seohee.netlify.app/" />
+<meta property="og:image" content="https://kyungsung-seohee.netlify.app/photos/og.jpg" />
+<meta property="og:image:width" content="800" />
+<meta property="og:image:height" content="800" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="경성 ♥ 서희, 결혼합니다" />
+<meta name="twitter:description" content="2026년 8월 29일 토요일 낮 12시 40분 · 위더스 영등포 9층 아모르홀" />
+<meta name="twitter:image" content="https://kyungsung-seohee.netlify.app/photos/og.jpg" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -149,30 +157,46 @@ section{padding:74px 30px;background:var(--bg);}
 .call-btn svg{width:15px;height:15px;fill:var(--accent);}
 
 /* ===== GALLERY 슬라이드 ===== */
-.slider{position:relative;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);background:#fbeef2;}
+.slider{position:relative;overflow:visible;}
 .slides{
-  display:flex;overflow-x:auto;scroll-snap-type:x mandatory;
+  display:flex;gap:14px;padding:8px 8% 14px;
+  overflow-x:auto;scroll-snap-type:x mandatory;
   -webkit-overflow-scrolling:touch;scrollbar-width:none;
 }
 .slides::-webkit-scrollbar{display:none;}
 .slides .slide{
-  flex:0 0 100%;scroll-snap-align:center;aspect-ratio:4/5;background:#fbeef2;cursor:pointer;
+  position:relative;flex:0 0 84%;scroll-snap-align:center;aspect-ratio:4/5;cursor:pointer;
+  border-radius:20px;overflow:hidden;background:#fbeef2;
+  box-shadow:0 22px 44px -24px rgba(190,120,145,.6);
+  opacity:.45;transform:scale(.93);transition:opacity .45s ease,transform .45s ease;
+  outline:1px solid rgba(255,255,255,.6);outline-offset:-7px;
 }
+.slides .slide.active{opacity:1;transform:scale(1);}
 .slides .slide img{width:100%;height:100%;object-fit:cover;display:block;}
+.slides .slide::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:42%;pointer-events:none;
+  background:linear-gradient(transparent,rgba(45,30,38,.32));
+}
+.sl-cap{
+  position:absolute;left:18px;bottom:15px;z-index:2;color:#fff;
+  font-family:"Noto Serif KR",serif;font-size:16px;letter-spacing:.04em;
+  text-shadow:0 2px 10px rgba(0,0,0,.45);opacity:0;transition:opacity .45s;
+}
+.slides .slide.active .sl-cap{opacity:1;}
 .sl-arrow{
-  position:absolute;top:50%;transform:translateY(-50%);z-index:2;
-  width:38px;height:38px;border-radius:50%;border:none;
-  background:rgba(255,255,255,.78);color:var(--ink);font-size:22px;line-height:1;
+  position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.85);color:var(--accent);font-size:21px;line-height:1;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 4px 12px -4px rgba(0,0,0,.3);backdrop-filter:blur(2px);
+  box-shadow:0 6px 16px -6px rgba(0,0,0,.35);backdrop-filter:blur(3px);
 }
-.sl-prev{left:12px;} .sl-next{right:12px;}
+.sl-prev{left:6%;} .sl-next{right:6%;}
 .sl-count{
-  position:absolute;right:12px;bottom:12px;z-index:2;
-  background:rgba(40,34,30,.55);color:#fff;font-size:12px;
-  padding:4px 10px;border-radius:20px;letter-spacing:.05em;
+  position:absolute;right:9%;top:18px;z-index:3;
+  background:rgba(45,30,38,.5);color:#fff;font-size:12px;
+  padding:4px 11px;border-radius:20px;letter-spacing:.06em;backdrop-filter:blur(2px);
 }
-.dots{display:flex;justify-content:center;gap:6px;margin:14px 0 4px;flex-wrap:wrap;}
+.dots{display:flex;justify-content:center;gap:6px;margin:6px 0 4px;flex-wrap:wrap;}
 .dots .dot{width:7px;height:7px;border-radius:50%;background:var(--accent-soft);transition:.3s;cursor:pointer;}
 .dots .dot.on{background:var(--accent);width:18px;border-radius:6px;}
 
@@ -624,42 +648,52 @@ for(let i=1;i<=TOTAL;i++){
   gallery.appendChild(cell);
 }
 
-/* ---------- 갤러리 (자동 슬라이드) ---------- */
+/* ---------- 갤러리 (자동 슬라이드 · 피크 캐러셀) ---------- */
 const slidesEl=document.getElementById('slides'),dotsEl=document.getElementById('dots'),slCount=document.getElementById('slCount');
 let slIdx=0, slTimer=null;
 for(let i=1;i<=TOTAL;i++){
-  const s=document.createElement('div');s.className='slide';
+  const s=document.createElement('div');s.className='slide'+(i===1?' active':'');
   const im=new Image();im.src=`photos/${i}.jpg`;im.alt=`slide ${i}`;
   s.appendChild(im);
+  const cap=document.createElement('div');cap.className='sl-cap';cap.textContent='경성 ♥ 서희';
+  s.appendChild(cap);
   s.addEventListener('click',()=>openLB(i));
   slidesEl.appendChild(s);
   const d=document.createElement('div');d.className='dot'+(i===1?' on':'');
-  d.addEventListener('click',()=>goSlide(i-1,true));
+  d.addEventListener('click',()=>goSlide(i,true));
   dotsEl.appendChild(d);
 }
+function centerOf(i){ const s=slidesEl.children[i]; return s.offsetLeft-(slidesEl.clientWidth-s.clientWidth)/2; }
 function goSlide(n,user){
   slIdx=(n+TOTAL)%TOTAL;
-  slidesEl.scrollTo({left:slidesEl.clientWidth*slIdx,behavior:user?'smooth':'auto'});
+  slidesEl.scrollTo({left:centerOf(slIdx),behavior:user?'smooth':'auto'});
   syncDots();
   if(user)restartAuto();
 }
 function syncDots(){
   slCount.textContent=`${slIdx+1} / ${TOTAL}`;
   [...dotsEl.children].forEach((d,i)=>d.classList.toggle('on',i===slIdx));
+  [...slidesEl.children].forEach((s,i)=>s.classList.toggle('active',i===slIdx));
 }
-// 스와이프(스크롤) 시 현재 인덱스 동기화
+// 스와이프(스크롤) 시 중앙에 가장 가까운 슬라이드로 인덱스 동기화
 let scrollT;
 slidesEl.addEventListener('scroll',()=>{
   clearTimeout(scrollT);
-  scrollT=setTimeout(()=>{ slIdx=Math.round(slidesEl.scrollLeft/slidesEl.clientWidth); syncDots(); },90);
+  scrollT=setTimeout(()=>{
+    const c=slidesEl.scrollLeft+slidesEl.clientWidth/2;
+    let best=0,bd=1e9;
+    [...slidesEl.children].forEach((s,i)=>{const sc=s.offsetLeft+s.clientWidth/2;const d=Math.abs(sc-c);if(d<bd){bd=d;best=i;}});
+    slIdx=best; syncDots();
+  },90);
 });
 document.getElementById('slPrev').onclick=()=>goSlide(slIdx-1,true);
 document.getElementById('slNext').onclick=()=>goSlide(slIdx+1,true);
 function startAuto(){ slTimer=setInterval(()=>goSlide(slIdx+1,false),3500); }
 function restartAuto(){ clearInterval(slTimer); startAuto(); }
-// 사용자가 만지는 동안 자동재생 잠시 멈춤
 slidesEl.addEventListener('pointerdown',()=>clearInterval(slTimer));
 slidesEl.addEventListener('pointerup',restartAuto);
+// 초기 위치 보정 후 자동재생
+setTimeout(()=>goSlide(0,false),60);
 startAuto();
 
 /* ---------- 라이트박스 ---------- */
