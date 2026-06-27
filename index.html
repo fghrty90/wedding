@@ -621,6 +621,7 @@ section{ padding:88px 30px; }
     </div>
     <form class="gb-form" id="gbForm">
       <input type="text" id="gbName" placeholder="이름" maxlength="10" required />
+      <input type="password" id="gbPw" placeholder="삭제 비밀번호 (숫자 4자리)" inputmode="numeric" pattern="[0-9]*" maxlength="6" required />
       <textarea id="gbMsg" rows="3" placeholder="축하 메시지를 남겨주세요" maxlength="200" required></textarea>
       <button type="submit" class="submit">등록하기</button>
     </form>
@@ -795,6 +796,8 @@ document.getElementById('shareKakao').onclick=()=>{
 const gbForm=document.getElementById('gbForm'),gbList=document.getElementById('guestList');
 document.getElementById('gbToggle').onclick=()=>gbForm.classList.toggle('show');
 
+// 관리자(신랑신부) 비밀번호 — 이 비번으로는 모든 글 삭제 가능
+const ADMIN_PW='0829';
 // 기본 축하 글 (삭제하면 다시 안 보이도록 숨김 목록 관리)
 const SEED=[
   {id:'seed-1',name:'쵬지',date:'2026-06-22',msg:'결혼 추카추카 합니다 🎉🎉'},
@@ -813,9 +816,16 @@ function renderAll(){
     el.querySelector('.g-name').textContent=g.name;
     el.querySelector('.g-date').textContent=g.date;
     el.querySelector('.g-msg').textContent=g.msg;
-    el.querySelector('.g-del').onclick=()=>{ if(confirm('이 글을 삭제할까요?')) removeGuest(g.id); };
+    el.querySelector('.g-del').onclick=()=>tryDelete(g);
     gbList.appendChild(el);
   });
+}
+function tryDelete(g){
+  const input=prompt('삭제하려면 비밀번호를 입력하세요\n(작성 시 입력한 비번 또는 관리자 비번)');
+  if(input===null) return;                       // 취소
+  const ok = input===ADMIN_PW || (g.pw && input===g.pw);
+  if(!ok){ showToast('비밀번호가 일치하지 않습니다'); return; }
+  removeGuest(g.id);
 }
 function removeGuest(id){
   if(String(id).startsWith('seed-')){
@@ -829,10 +839,12 @@ gbForm.onsubmit=e=>{
   e.preventDefault();
   const name=document.getElementById('gbName').value.trim();
   const msg=document.getElementById('gbMsg').value.trim();
+  const pw=document.getElementById('gbPw').value.trim();
   if(!name||!msg)return;
+  if(!/^\d{4,6}$/.test(pw)){ showToast('비밀번호는 숫자 4~6자리로 입력해주세요'); return; }
   const date=new Date().toISOString().slice(0,10);
   const id='u-'+date+'-'+Math.floor(performance.now());
-  const users=getUsers();users.push({id,name,msg,date});
+  const users=getUsers();users.push({id,name,msg,date,pw});
   localStorage.setItem('guestbook',JSON.stringify(users));
   renderAll();gbForm.reset();gbForm.classList.remove('show');showToast('축하 글이 등록되었습니다');
 };
