@@ -683,14 +683,14 @@ for(let i=1;i<=TOTAL;i++){
 
 /* ---------- 갤러리 (자동 슬라이드 · 피크 캐러셀) ---------- */
 const slidesEl=document.getElementById('slides'),dotsEl=document.getElementById('dots'),slCount=document.getElementById('slCount');
-let slIdx=0, slTimer=null;
+let slIdx=0, slTimer=null, dragMoved=false;
 for(let i=1;i<=TOTAL;i++){
   const s=document.createElement('div');s.className='slide'+(i===1?' active':'');
   const im=new Image();im.src=`photos/${i}.jpg`;im.alt=`slide ${i}`;
   s.appendChild(im);
   const cap=document.createElement('div');cap.className='sl-cap';cap.textContent='경성 ♥ 서희';
   s.appendChild(cap);
-  s.addEventListener('click',()=>openLB(i));
+  s.addEventListener('click',()=>{ if(!dragMoved) openLB(i); });
   slidesEl.appendChild(s);
   const d=document.createElement('div');d.className='dot'+(i===1?' on':'');
   d.addEventListener('click',()=>goSlide(i,true));
@@ -723,8 +723,29 @@ document.getElementById('slPrev').onclick=()=>goSlide(slIdx-1,true);
 document.getElementById('slNext').onclick=()=>goSlide(slIdx+1,true);
 function startAuto(){ slTimer=setInterval(()=>goSlide(slIdx+1,false),3500); }
 function restartAuto(){ clearInterval(slTimer); startAuto(); }
-slidesEl.addEventListener('pointerdown',()=>clearInterval(slTimer));
-slidesEl.addEventListener('pointerup',restartAuto);
+// 마우스 드래그로 넘기기 (터치는 네이티브 스와이프)
+let dragging=false,dragStartX=0,dragStartScroll=0;
+slidesEl.addEventListener('pointerdown',e=>{
+  clearInterval(slTimer);
+  if(e.pointerType==='mouse'){ dragging=true; dragMoved=false; dragStartX=e.clientX; dragStartScroll=slidesEl.scrollLeft; slidesEl.style.cursor='grabbing'; }
+});
+slidesEl.addEventListener('pointermove',e=>{
+  if(!dragging) return;
+  const dx=e.clientX-dragStartX;
+  if(Math.abs(dx)>4) dragMoved=true;
+  slidesEl.scrollLeft=dragStartScroll-dx;
+});
+function endDrag(){
+  if(dragging){
+    dragging=false; slidesEl.style.cursor='';
+    const c=slidesEl.scrollLeft+slidesEl.clientWidth/2; let best=0,bd=1e9;
+    [...slidesEl.children].forEach((s,i)=>{const sc=s.offsetLeft+s.clientWidth/2;const d=Math.abs(sc-c);if(d<bd){bd=d;best=i;}});
+    goSlide(best,true);
+    setTimeout(()=>{dragMoved=false;},60);
+  } else { restartAuto(); }
+}
+slidesEl.addEventListener('pointerup',endDrag);
+slidesEl.addEventListener('pointerleave',endDrag);
 // 초기 위치 보정 후 자동재생
 setTimeout(()=>goSlide(0,false),60);
 startAuto();
