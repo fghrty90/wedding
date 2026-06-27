@@ -2,3 +2,6 @@
 public/
 hero.png
 full.png
+
+# Local Netlify folder
+.netlify
