@@ -18,7 +18,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500&family=Gowun+Batang:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 
 <style>
@@ -343,6 +343,40 @@ footer{background:#3a3531;color:#cabfb3;text-align:center;padding:40px 24px 50px
 footer .f-names{font-family:"Noto Serif KR";font-size:18px;color:#fff;margin-bottom:8px;}
 footer .f-date{font-size:12.5px;opacity:.7;letter-spacing:.05em;}
 footer .f-thanks{font-size:14.5px;margin-top:18px;opacity:.85;line-height:1.8;}
+
+/* =====================================================
+   MODERN EDITORIAL — 모던/세련 (메인 핑크 프레임 유지)
+   ===================================================== */
+:root{ --accent:#dd8aa0; --accent-soft:#f0cdd6; --ink:#33302d; --ink-soft:#9c948c; }
+section{ padding:92px 32px; }
+.tag{
+  font-family:"Cormorant Garamond",serif !important;
+  font-style:italic;font-weight:500;text-transform:none;
+  font-size:20px;letter-spacing:.06em;text-indent:0;color:var(--accent);margin-bottom:10px;
+}
+.heading{ font-family:"Noto Serif KR",serif;font-weight:300;font-size:25px;letter-spacing:.04em;color:var(--ink); }
+.divider{ width:1px;height:40px;background:linear-gradient(var(--accent-soft),transparent);margin:22px auto 0; }
+
+.hero{ gap:0;padding:64px 30px 48px; }
+.hero__top{ position:relative; }
+.hero__top::before{ content:"";display:block;width:46px;height:1px;background:var(--accent-soft);margin:0 auto 22px; }
+.hero__label{
+  font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:500;
+  font-size:22px;letter-spacing:.04em;text-transform:none;color:var(--accent);margin-bottom:22px;
+}
+.hero__names{ font-family:"Noto Serif KR",serif;font-weight:200;font-size:52px;letter-spacing:.14em;line-height:1.3; }
+.hero__names .amp{
+  font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:400;
+  font-size:34px;color:var(--accent);margin:10px 0;letter-spacing:0;
+}
+.hero__photo{ margin:34px auto 30px;width:78%;max-width:300px;aspect-ratio:4/5; }  /* 아치+핑크프레임은 기본 유지 */
+.hero__photo::after{ background:#ff9dc5;opacity:.2; }                              /* 핑크 틴트 은은하게 */
+.hero__date{ font-family:"Noto Serif KR",serif;font-weight:400;font-size:17px;letter-spacing:.05em;color:var(--ink);margin-bottom:4px; }
+.hero__place{ font-size:13px;letter-spacing:.04em;color:var(--ink-soft); }
+
+.invite .ornament{ font-family:"Cormorant Garamond",serif;font-style:italic;font-size:26px; }
+.invite .msg{ font-family:"Gowun Batang",serif;font-size:17px;line-height:2.5;color:#5b544d; }
+.sl-cap{ font-family:"Cormorant Garamond",serif !important;font-style:italic;font-size:19px; }
 
 /* 토스트 */
 .toast{

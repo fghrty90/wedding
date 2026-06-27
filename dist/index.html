@@ -90,7 +90,7 @@ body{
 .hero__photo{
   width:74%;max-width:288px;aspect-ratio:3/4;margin:14px auto;
   border-radius:150px 150px 16px 16px;overflow:hidden;
-  box-shadow:0 0 0 8px #fbd9e4, 0 0 0 9px #f3bdcf, 0 28px 52px -22px rgba(210,140,165,.6);
+  box-shadow:0 0 0 4px #ffffff, 0 0 0 6px #ff9dc5, 0 26px 46px -24px rgba(255,140,185,.55);
   background:linear-gradient(160deg,#fbe9ee,#f3d3dd);
   position:relative;
 }
@@ -474,11 +474,9 @@ footer .f-thanks{font-size:14.5px;margin-top:18px;opacity:.85;line-height:1.8;}
         <div class="hall">9층 아모르홀</div>
         <div class="addr">서울특별시 영등포구 영중로 55 (영등포동6가 7)</div>
       </div>
-      <iframe class="map" title="예식장 위치"
-        src="https://maps.google.com/maps?q=37.521371,126.904494&z=17&output=embed"
-        loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <div class="map" id="mapBox" title="예식장 위치"></div>
       <div class="map-btns">
-        <a href="https://map.naver.com/p?c=15,0,0,0,dh&lng=126.904494&lat=37.521371" target="_blank" rel="noopener">네이버 지도</a>
+        <a href="https://map.naver.com/p/entry/place/36957673" target="_blank" rel="noopener">네이버 지도</a>
         <a href="https://map.kakao.com/link/map/위더스 영등포,37.521371,126.904494" target="_blank" rel="noopener">카카오맵</a>
         <a href="https://www.google.com/maps/dir/?api=1&destination=37.521371,126.904494" target="_blank" rel="noopener">길찾기</a>
       </div>
@@ -789,6 +787,31 @@ gbForm.onsubmit=e=>{
   renderAll();gbForm.reset();gbForm.classList.remove('show');showToast('축하 글이 등록되었습니다');
 };
 renderAll();
+
+/* ---------- 지도 (네이버 우선, 키 없으면 구글 폴백) ---------- */
+const NAVER_MAP_KEY=""; // ← 네이버 클라우드 Maps Client ID 입력하면 네이버 지도로 표시
+const VENUE={lat:37.521371,lng:126.904494,name:"위더스 영등포 9층 아모르홀"};
+function loadGoogleMap(){
+  const box=document.getElementById('mapBox');if(!box)return;
+  const f=document.createElement('iframe');
+  f.className='map';f.title='예식장 위치';f.loading='lazy';
+  f.referrerPolicy='no-referrer-when-downgrade';
+  f.src=`https://maps.google.com/maps?q=${VENUE.lat},${VENUE.lng}&z=17&output=embed`;
+  box.replaceWith(f);
+}
+function loadNaverMap(){
+  window.navermap_authFailure=loadGoogleMap;
+  const s=document.createElement('script');
+  s.src=`https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NAVER_MAP_KEY}`;
+  s.onload=()=>{ try{
+    const pos=new naver.maps.LatLng(VENUE.lat,VENUE.lng);
+    const map=new naver.maps.Map('mapBox',{center:pos,zoom:17,scaleControl:false,mapDataControl:false});
+    new naver.maps.Marker({position:pos,map,title:VENUE.name});
+  }catch(e){ loadGoogleMap(); } };
+  s.onerror=loadGoogleMap;
+  document.head.appendChild(s);
+}
+NAVER_MAP_KEY ? loadNaverMap() : loadGoogleMap();
 </script>
 </body>
 </html>
